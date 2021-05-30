@@ -1,0 +1,190 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Ejercicio 2
+```{r}
+df <- read.csv("Admission_Predict_Ver1.1.csv", sep=",")
+head(df)
+```
+## Realizar analisis estadistico
+```{r}
+summary(df)
+  
+```
+## 2. Realice una gráfica de densidad para cada una de las variables numéricas en el dataset: GRE.Score, TOEFEL.Score, CGPA y Chance of Admit.
+
+```{r}
+par(mfrow=c(2, 2))
+plot(density(df$GRE.Score),main="Grafica #1 GRE.Score")
+plot(density(df$TOEFL.Score),main="Grafica #2 TOELF.Score")
+plot(density(df$CGPA),main="Grafica #3 CGPA")
+plot(density(df$Chance.of.Admit),main="Grafica #4 Chance.of.Admit")
+```
+## 3. Realice una gráfica de correlación entre las variables del inciso anterior.
+
+```{r}
+library(PerformanceAnalytics)
+df2<- select(df,GRE.Score ,TOEFL.Score,CGPA,Chance.of.Admit)
+chart.Correlation(df2, histogram = TRUE, method = "pearson")
+```
+## 4. Realice comentarios sobre el análisis estadístico de las variables numéricas y la gráfica de correlación.
+Todas las variables analiazadas previamente cuentan con una excelente correlacion lo cual quere decir que pueden ser significativas para el modelo a desarrollar,
+
+
+## 5. Realice un scatter plot de todas las variables numéricas contra la variable Chance of Admit.
+
+```{r}
+## Forma 1 usando plot
+par(mfrow=c(1, 3))
+plot(df2$Chance.of.Admit,df2$GRE.Score,xlab="Chance.of.Admit", ylab="GRE.Score")
+plot(df2$Chance.of.Admit,df2$TOEFL.Score,xlab="Chance.of.Admit", ylab="TOEFL.Score")
+plot(df2$Chance.of.Admit,df2$CGPA,xlab="Chance.of.Admit", ylab="CGPA")
+
+```
+```{r}
+## Forma 2 usado ggplot2
+library(ggplot2)
+
+ggplot(df2, aes(x = GRE.Score, y = Chance.of.Admit)) +
+  geom_point() + 
+  ggtitle("Grafico No.1:  Chance.of.Admit - GRE.Score") +
+  theme_classic()
+
+ggplot(df2, aes(x = TOEFL.Score, y = Chance.of.Admit)) +
+  geom_point(color="blue") + 
+  ggtitle("Grafico No.2: Chance.of.Admit - TOEFL.Score") +
+  theme_light()
+
+ggplot(df2, aes(x = CGPA, y = Chance.of.Admit)) +
+  geom_point(color="red") + 
+  ggtitle("Grafico No.3: Chance.of.Admit-CGPA") +
+  theme_minimal()
+
+
+```
+## 6. Realice un modelo de regresión lineal simple con cada variable numérica como X y la variable Chance of Admit como Y.
+
+```{r}
+## Primer regresion
+lms1 <- lm(Chance.of.Admit ~ GRE.Score, data = df2)
+summary(lms1)
+
+
+```
+```{r}
+## Segunda regresion
+lms2 <- lm(Chance.of.Admit ~ TOEFL.Score, data = df2)
+summary(lms2)
+
+```
+```{r}
+## Tercera regresion
+lms3 <- lm(Chance.of.Admit ~ CGPA, data = df2)
+summary(lms3)
+
+```
+## 7. Realice una gráfica de cada modelo de regresión lineal en su scatter plot correspondiente.
+```{r}
+ggplot(df2, aes(y=Chance.of.Admit, x=GRE.Score)) + 
+  geom_point()+
+  geom_smooth(method=lm)
+
+ggplot(df2, aes(y=Chance.of.Admit, x=TOEFL.Score)) + 
+  geom_point()+
+  geom_smooth(method=lm)
+ggplot(df2, aes(y=Chance.of.Admit, x=CGPA)) + 
+  geom_point()+
+  geom_smooth(method=lm)
+```
+
+## Como en la Parte #2, realice un análisis sobre los resultados de cada modelo y diga cual de estos considera que es mejor y por que.
+
+
+Dados los vaores obtenidos de los modelos de regresion , creeria que el mejor modelo es el lms3 el cual posse un r2 mas alto que los otrs dos sin llegar a considerarse sobredimensionado,los tres modelos tiene una asociacion estadisticamente significativa, adicionalmente el tercer modelos posee un RSE mas peque;o comparado con lso otros dos.
+
+# Ejercicion # 3
+
+## Modelo 1
+El modelo muestra una relacion relacion de dos variables directamente dado que el primer y el tercer cuartil no son muy parecidos y dado que la media no es cero podemos decir que estos datos no poseen un distribucio normal.
+
+Este modelo posee un RSE de 3049 lo cual comprardo con los otros dos modelos es mas alto por que se peude considerar que los otros modelos daran mejores resultados.
+
+El R2 para este modelo es de 15.31% lo cual segun o vito en las clases es un valor muy peque;o, ya que  se condideran valores buenos para R2 entre 0.55 y 0.9 como maximo para no sobre ajustar el modelo.
+
+Significancia individual:
+viene dada por la siguiente hipótesis:
+
+Ho: Bi igual a cero (No significativo)
+H1: Bi distinto de cero (Significativo)
+Para nuestro caso utilizaremos el test a partir del p-Valor.
+En este caso, la regla de rechazo se establece alrededor del nivel de significancia, rechazamos la hipótesis en caso de que el p-valor sea inferior al nivel crítico elegido. Para ver esto más directamente, recordemos que el p.valor es una suma del área bajo la curva de densidad que esta entre el t calculado y el +inf, por lo que, esta solo será inferior al nivel crítico cuando el t.calculado sea inferior al t.tabla (teórico).
+
+Significancia Global:
+Vine dada por la siguiente hipótesis:
+Ho: B1 = B2 = Bk = 0 (igual a cero)
+H1: B1 diferente B2 diferente Bk diferente de cero
+
+
+El p-valor asociado al contraste (0.03579) es menor que a = 0.05 , por lo que rechazamos la hipótesis nula. Esto implica que la variable independiente contribuye de forma significativa a la explicación de la variable respuesta.
+
+## Modelo 2
+
+El modelo muestra una relacion relacion de cuatro variables directamente dado que el primer y el tercer cuartil no son muy parecidos y dado que la media no es cero podemos decir que estos datos no poseen un distribucio normal.
+
+te modelo posee un RSE de 670.4 lo cual comprardo con los otros dos modelos esta en el centro por que se puede considerar que qun hay un modelo que peude ser dar mejores resultados.
+
+El R2 para este modelo es de 96.21% lo cual segun o visto en las clases es un valor muy alto, ya que  se condideran valores buenos para R2 entre 0.55 y 0.9 como maximo para no sobre ajustar el modelo.
+
+Significancia Individual, viene dada por la siguiente hipótesis:
+Ho: Bi igual a cero (No significativo)
+H1: Bi distinto de cero (Significativo)
+
+Con un nivel de confianza de 95% la variable UNEM, HGRAD, INC son estadísticamente significativa dentro del modelo. La variable se ubica en el área de rechazo de Ho, por consiguiente, este coeficiente es diferente de cero.  Asimismo, es importante denotar que todas las variables incluidas en este nuevo modelo, también son significativas a un 99%.
+
+Significancia Global:
+Vine dada por la siguiente hipótesis:
+Ho: B1 = B2 = Bk = 0 (igual a cero)
+H1: B1 diferente B2 diferente Bk diferente de cero
+
+A nivel global el modelo es estadísticamente significativo, sus p-valúes son menores que 5%, confirmando que las variables seleccionadas para predecir el comportamiento de Roll son estadísticamente significativas.
+
+
+## Modelo 3
+
+
+El modelo muestra una relacion relacion de 2 variables directamente dado que el primer y el tercer cuartil no son muy parecidos y dado que la media no es cero podemos decir que estos datos no poseen un distribucio normal.
+
+el modelo posee un RSE de 5.657 lo cual comprardo con los otros dos modelos es el mas peque;o y se puede considerar que es el modelo que peude ser dar mejores resultados.
+
+El R2 para este modelo es de 95.09% lo cual segun o visto en las clases es un valor muy alto, ya que  se condideran valores buenos para R2 entre 0.55 y 0.9 como maximo para no sobre ajustar el modelo. peroo dado que los r2 de los tres modelo estan en los extremos y considerando el RSE conderaria el modelo 3 como el mejor modelo para precedir.
+
+Significancia Individual, viene dada por la siguiente hipótesis:
+Ho: Bi igual a cero (No significativo)
+H1: Bi distinto de cero (Significativo)
+
+Con un nivel de confianza de 95% la variable months es estadísticamente significativa dentro del modelo. La variable se ubica en el área de rechazo de Ho, por consiguiente, este coeficiente es diferente de cero.  Asimismo, es importante denotar esta variable incluidas en este, también es significativa a un 99%.
+
+Significancia Global:
+Vine dada por la siguiente hipótesis:
+Ho: B1 = B2 = Bk = 0 (igual a cero)
+H1: B1 diferente B2 diferente Bk diferente de cero
+
+A nivel global el modelo es estadísticamente significativo, su p-valúe es menor que 5%, confirmando que las variables seleccionadas para predecir el comportamiento de Roll son estadísticamente significativas.
+
+
+
+ 
