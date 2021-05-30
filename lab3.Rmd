@@ -3,12 +3,21 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+# Ejercicio 1
+## LLamando a script que recibe como argumento la direccion de csv de dos columnas y retorna una lista con los siguientes elementos: Estimadores, r2, r, Residuos, grafico
+```{r}
+source("script.R") ## Ejecutnado el script
+salida<-regresion("df3.csv") # llamando la funcion que esta contenida dentro del script pasandole como argumneto la direccion del archivo de dos variables "X" and "Y" donde X es la primer columna Y es la segunda columa.
+salida
 
-
-
-
-
-
+```
+## Llamando script que recibe como argumento un dataframe de 2 columnas y retorna una lista con los siguientes elementos: Estimadores, r2, r, Residuos, grafico
+```{r}
+df<-read.csv("df3.csv",sep=",")
+source("script2.R")
+salida2<-regresion(df)
+salida
+```
 
 
 
@@ -38,6 +47,7 @@ plot(density(df$Chance.of.Admit),main="Grafica #4 Chance.of.Admit")
 
 ```{r}
 library(PerformanceAnalytics)
+library(dplyr)
 df2<- select(df,GRE.Score ,TOEFL.Score,CGPA,Chance.of.Admit)
 chart.Correlation(df2, histogram = TRUE, method = "pearson")
 ```
